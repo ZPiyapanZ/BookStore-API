@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: Bookstore API
+  description: API document for Bookstore.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: localhost
+tags:
+  - name: Users
+  - name: Books
+
+paths:
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - "Users"
+      summary: Get current data for a user.
+      responses:
+        200:
+          description: Return current data for a user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  date_of_birth:
+                    type: string
+                  books:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        bookId:
+                          type: string
+                        book_name:
+                          type: string
+                        author_name:
+                          type: string
+                        price:
+                          type: number
+                        is_recommended:
+                          type: boolean
+                        createdAt:
+                          type: string         
+        401:
+          description: Token is invalid or not logged in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+    post:
+      tags:
+        - "Users"
+      summary: Create user data.
+      requestBody:
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+                  name:
+                    type: string
+                  surname:
+                    type: string
+                  date_of_birth:
+                    type: string
+      responses:
+        200:
+          description: Create user data success.
+        409:
+          description: Username already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    default: 409
+                  message: 
+                    type: string
+                    default: Username already exists
+                  error: 
+                    type: string
+                    default: Conflict
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - "Users"
+      summary: Delete a user from the book store API
+      responses:
+        200:
+          description: Delete a user success.
+        401:
+          description: Token is invalid or not logged in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+  /login:
+    post:
+      tags:
+        - "Users"
+      summary: Log in bookstore api.
+      requestBody:
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+      responses:
+        200:
+          description: Login bookstore success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+        401:
+          description: Login failed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    default: 401
+                  message: 
+                    type: string
+                    default: Please check your login credentials
+                  error: 
+                    type: string
+                    default: Unauthorized
+  /users/orders:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - "Users"
+      summary: Order books.
+      requestBody:
+        content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: number
+      responses:
+        200:
+          description: Login bookstore success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+        401:
+          description: Token is invalid or not logged in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+        404:
+          description: Book ID not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    default: 404
+                  message: 
+                    type: string
+                  error:
+                    type: string
+                    default: "Not Found"
+  /books:
+    get:
+      tags:
+        - 'Books'
+      summary: Get book data from an external book publisher's web service.
+      responses:
+        200:
+          description: Return Books.
+          content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    properties:
+                      price:
+                        type: number
+                      id: 
+                        type: number
+                      book_name:
+                        type: string
+                      author_name:
+                        type: string
+                      is_recommended:
+                        type: boolean
+
+
+components:
+  schemas:
+    Unauthorized:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          default: 401
+        message:
+          type: string
+          default: Unauthorized
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  
